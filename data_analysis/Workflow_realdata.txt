@@ -1,0 +1,56 @@
+
+
+The genotypic data of Human Connectome Project Young Adult can be accessed on "dbGap" database (after application approval).
+
+The downloaded data (from dbGap) generally contains:
+MEGA_Chip.bed
+MEGA_Chip.bim
+MEGA_Chip.fam
+MEGA_Chip.log (not useful)
+MEGA_Chip.gds (not necessary, can be read by the software "SNPRelate")
+
+
+Before elaborating the details of real data analysis, please download the datasets in this GitHub repository, https://github.com/YY634/multi-task-learning-with-group-wise-mixture-parameters/tree/main/demo_datasets
+To comply with NIH regulation on protecting sensitive/confidential data or UKB policy, some real  datasets used in simulation or real data analysis cannot be released. Therefore, we synthesized the above datasets (in GitHub repository) for illustration purpose. 
+Before running the R scripts, please store all the downloaded datasets and all the R scripts under the same directory. 
+
+
+Step 1: preprocess the dataset
+Run the R script "1_preprocess_dataset.R" to remove genetically dependent individuals and individuals with missing data.
+Last part of "1_preprocess_dataset.R" is use PLINK for SNP quality control, that is, filtering SNPs with low quality.
+
+Step 2: group SNPs into genes
+Run the R scripts "2_run_annovar.R" and "3_process_annovar_output.R" to group SNPs into genes and to remove intergenic SNPs. 
+
+Step 3: transform the binary SNP data into 0/1/2
+Run the R script "4_transform_SNPs.R" to transform binary SNP format into integers 0/1/2.  
+
+Step 4: conduct group-wise PCA within each gene
+Run the R script "5_generate_X.R" to perform group-wise PCA within each gene, and keep top PCs within each gene. These PCs will stack vertically to form the design matrix X. Standardize the columns of X.  
+
+The above steps will produce chr##_X.RData which contains the design matrix for chromosome## and its dimensions. 
+
+Step 5: preprocess environmental/demographic covariates
+Run the R script "6_process_covariate.R" to preprocess the environmental/demographic covariates, and generate U.
+We include age, gender, handedness, race (top 10 PCs of the whole genome) as environmental/demographic covariates. We standardize the continuous covariates (age, top 10 PCs of the whole genome), and leave the binary covariates as they are. 
+
+Step 6: preprocess the brain regional volumes
+Run the R script "7_process_Y.R" to preprocess the brain regional volumes to generate the response Y.  
+
+Step 7: apply the main algorithm, Algorithm 1, to X, U, Y
+Run the R script "9_ukb_chr##.R" to implement our method to fit model 2.1 on brain regional volumes (Y), genotype on chromosome ## (X), and the environmental/demographic covariates (U). The output includes the clustering patterns of the estimated coefficient vectors.  
+
+Step 8: extract clusters/subnetworks from the output
+Run the R script "10_extract_cluster.R" to extract the subnetworks induced by genes. 
+
+Step 9: validate the extracted brain subnetworks
+Run the R script "11_cluster_yeo7_overlap.R" to compute the overlap percentage between any identified subnetwork and Yeo7 network; run the R script "12_visualizebrain_gene_clusters_multiplot.R" to test the differential expression levels of this gene within and outside its induced subnetwork. 
+
+
+Due to the database policy, we are not allowed to release the real dataset which is sensitive and confidential. We synthesized some datasets for illustration purpose. We cannot generate the
+original SNP binary data. So, for illustration purpose, we start from Step 7 above.
+Under the folder “real_data_analysis”, there are three datasets, “chr18_X.RData”, “UKB_U.RData”,
+“UKB_Y.RData”. To implement our main algorithm, run the R script
+“9_ukb_chr18.R” which takes in the above three datasets. Then run the R scripts
+"10_extract_cluster.R" and "12_visualizebrain_gene_clusters_multiplot.R" to extract brain
+subnetworks and to visualize the subnetworks.
