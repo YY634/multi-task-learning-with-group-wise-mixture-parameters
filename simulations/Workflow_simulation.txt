@@ -1,0 +1,19 @@
+Before elaborating the details of simulation, please download the datasets in this GitHub repository, https://github.com/YY634/multi-task-learning-with-group-wise-mixture-parameters/tree/main/demo_datasets
+To comply with NIH regulation on protecting sensitive/confidential data or UKB policy, some real  datasets used in simulation or real data analysis cannot be released. Therefore, we synthesized the above datasets (in GitHub repository) for illustration purpose. 
+Before running the R scripts, please store all the downloaded datasets and all the R scripts under the same directory. 
+
+
+
+
+In Setting 1, 2, 3, 4, the data is simulated and no external datasets are needed. 
+Running the R scripts "simulation_setting#.R" and "evaluation_#.R" (running them successively) will reproduce the results in Setting # in Section 2.4, where #=1/2/3/4.
+
+In Setting 5, we use real data from Human Connectome Project Young Adult (HCP-YA) dataset. Due to the database policy (NIH regulation on protecting sensitive and confidential data), we are not allowed to release the real dataset. We simulated some datasets for demonstration purpose, which are "chr21_X.RData", "HCPYA_U.RData", and "result_21.RData".
+When running the R script "simulation_setting5.R", it will load these three RData files. 
+Note that, the above simulated data will produce different result than Setting 5 in Section 2.4 because we used real data from HCP-YA to conduct the simulation in Setting 5. 
+
+In Setting 6, we use real data from UK Biobank (UKB) dataset. Due to the database policy, we are not allowed to release the real dataset. We simulated some datasets for demonstration purpose, which are "chr18_X.RData", "UKB_U.RData", and "result_18.RData".
+When running the R script "simulation_setting6.R", it will load these three RData files. 
+Note that, the above simulated data will produce different result than Setting 6 in Section 2.4 because we used real data from HCP-YA to conduct the simulation in Setting 6. 
+
+Finally, the results can be visualized by running the R script "plot.R".
