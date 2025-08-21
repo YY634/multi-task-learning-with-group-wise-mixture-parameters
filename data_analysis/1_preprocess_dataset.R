@@ -1,5 +1,5 @@
 #preprocess the phenotype and covariate
-df<-read.csv("/mnt/project/Yisha_imaging_covariate_participant.csv")
+df<-read.csv("/mnt/project/imaging_covariate_participant.csv")
 df_sub<-df[,c(1,3:72,75,76,78:87)]
 sum(is.na(df_sub)) #p26904_i2 has one NA
 sum(df_sub=="",na.rm=T) #p1707_i0 has 9 ""

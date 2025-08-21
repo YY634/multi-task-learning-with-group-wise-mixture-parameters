@@ -1,6 +1,3 @@
-#!/usr/bin/env Rscript
-#SBATCH --mem-per-cpu=2g  --time=24:00:00 --mail-type=ALL --mail-user=yisha.yao@yale.edu
-
 library(plyr)
 library(MASS)
 library(Matrix)

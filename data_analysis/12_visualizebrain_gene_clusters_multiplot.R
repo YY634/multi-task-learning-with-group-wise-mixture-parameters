@@ -30,7 +30,7 @@ yeo7_plot = dk_to_yeo7_key %>%
 load(paste0(path,"PLOT.RData"))
 PLOT<-as.data.frame(PLOT)
 
-# gene_symbols = read.table("Y:/wd278/Projects with Others/Yisha/Results/Visualization/yeo7_gene_ensemb_ID.txt", header = F, stringsAsFactors = F)
+
 load(paste0(path,"/dkt_gene_expr_modified.RData"))
 colnames(dkt_gene)[5:72] = brain_names
 rm(dk)
@@ -107,14 +107,12 @@ for(i in 1:length(within_cluster_gene_expr)){
   stable.p <- ggtexttable(d, rows = c("Outside Cluster", "Within Cluster", "p-value"))
   p_clusters[[length(p_clusters) + 1]] = stable.p
   multi.page <- ggarrange(plotlist = p_clusters, nrow = 1) # for one plot per page
-  #ggexport(multi.page,
-  #         filename=paste0("/Volumes/Students/yh567/Manuscripts/Project_for_Yisha/plot/select_row_", i, "_Gene_boxplot_v2.pdf"))
-  ggsave(filename=paste0("/Volumes/Students/yh567/Manuscripts/Project_for_Yisha/plot/select_row_", i, "_Gene_boxplot_v2.pdf"), multi.page,width=8,height=3)
+  ggsave(filename=paste0("/Volumes/Students/yh567/Manuscripts/Project_for_YY/plot/select_row_", i, "_Gene_boxplot_v2.pdf"), multi.page,width=8,height=3)
   
   # multi.page <- ggarrange(stable.p)
   # ggexport(multi.page,
   #          width = 16, height = 10,
-  #          filename=paste0("Y:/wd278/Projects with Others/Yisha/Results/Visualization/select_cluster/select_row_", i, "_Gene_boxplot_v2.pdf"))
+  #          filename=paste0("Y:/wd278/Projects with Others/YY/Results/Visualization/select_cluster/select_row_", i, "_Gene_boxplot_v2.pdf"))
 
    
   tmp = results %>% 
@@ -137,8 +135,8 @@ for(i in 1:length(within_cluster_gene_expr)){
                            cluster_plot + rremove("legend"), ncol=2, nrow = 1,
                            common.legend = TRUE, legend = "bottom") # for one plot per page
   #ggexport(multi.page2, 
-  #         filename=paste0("/Volumes/Students/yh567/Manuscripts/Project_for_Yisha/plot/select_row_", i, "_cluster_boxplot.pdf"))
-  ggsave(filename=paste0("/Volumes/Students/yh567/Manuscripts/Project_for_Yisha/plot/select_row_", i, "_cluster_boxplot.pdf"), 
+  #         filename=paste0("/Volumes/Students/yh567/Manuscripts/Project_for_YY/plot/select_row_", i, "_cluster_boxplot.pdf"))
+  ggsave(filename=paste0("/Volumes/Students/yh567/Manuscripts/Project_for_YY/plot/select_row_", i, "_cluster_boxplot.pdf"), 
          multi.page2,width = 10, height=5)
   
   blank_plot <- ggplot() + theme_void()
@@ -152,7 +150,7 @@ for(i in 1:length(within_cluster_gene_expr)){
                            heights = c(5,0.35,3.5),
                            widths = c(0.5,10))
   
-  ggsave(filename=paste0("/Volumes/Students/yh567/Manuscripts/Project_for_Yisha/plot/select_row_", i, "_cluster_gene_boxplot.pdf"), 
+  ggsave(filename=paste0("/Volumes/Students/yh567/Manuscripts/Project_for_YY/plot/select_row_", i, "_cluster_gene_boxplot.pdf"), 
          multi.page3,width = 10, height=8)
 }
 

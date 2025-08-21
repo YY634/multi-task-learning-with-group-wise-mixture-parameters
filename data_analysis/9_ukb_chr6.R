@@ -1,5 +1,3 @@
-#!/usr/bin/env Rscript
-#SBATCH --mem-per-cpu=2g  --time=24:00:00 --mail-type=ALL --mail-user=yisha.yao@yale.edu
 
 library(plyr)
 library(MASS)
@@ -269,7 +267,7 @@ repeat{
       cluster_nums_temp[i] <- 0
     } else{
       temp <- Beta_temp[(low[i]:upp[i]),Blabels_temp[i,]]
-      mod <- Mclust(t(temp), G=1:6, control=emControl(eps=0.001)) # maybe add the shape of the clusters?
+      mod <- Mclust(t(temp), G=1:6, control=emControl(eps=0.001)) 
       index1 <- which(Blabels_temp[i,] ==0)
       if (length(index1) >0){
         part1 <- as.data.frame(cbind(index1, 0))

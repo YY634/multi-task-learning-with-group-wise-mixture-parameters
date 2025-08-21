@@ -1,5 +1,3 @@
-#!/usr/bin/env Rscript
-#SBATCH --mem-per-cpu=2g  --time=24:00:00 --mail-type=ALL --mail-user=yisha.yao@yale.edu
 
 library(plyr)
 library(MASS)
@@ -42,7 +40,6 @@ means <- list()  #means[[t]] <- matrix(0, n_pc_d, p)
 classifications <- list()  #classifications[[t]] <- matrix(0, n_q, p)
 cluster_nums <- list()  #cluster_nums[[t]] <- rep(0, n_q)
 covariances <- list()  #covariances[[t]] is also a list.
-#best_models <- list()  #best_models[[t]] <- c()
 
 #to obtain the starting point
 Beta_0 <- matrix(0, d, p)
