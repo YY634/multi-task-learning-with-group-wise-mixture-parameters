@@ -1,5 +1,3 @@
-#!/usr/bin/env Rscript
-#SBATCH --mem-per-cpu=2g  --time=4:00:00 --mail-type=ALL --mail-user=yisha.yao@yale.edu
 
 #setting 3
 n <- 1800;  d <- 3500;  q <- 700;  p <- 200;  del <- 0.1714;  m <- 4  #m is the number of adjusting covariates
@@ -332,5 +330,5 @@ repeat{
 # Beta_labels records the true classifications
 save(d, p, q, group_sizes, Beta, Beta_labels, Beta_cluster_num, true_means,
      Betas, Blabels, classifications, means, covariances, cluster_nums, best_models,
-     file = "/gpfs/gibbs/project/zhang_heping/yy634/JASA_case/simulations/setting3.RData")
+     file = "path/setting3.RData")
 

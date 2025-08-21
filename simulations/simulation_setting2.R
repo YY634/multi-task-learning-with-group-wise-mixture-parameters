@@ -1,5 +1,3 @@
-#!/usr/bin/env Rscript
-#SBATCH --mem-per-cpu=4g  --time=8:00:00 --mail-type=ALL --mail-user=yisha.yao@yale.edu
 
 #setting 2
 n <- 1800;  d <- 6000;  q <- 800;  p <- 200;  del <- 0.12; m <- 4
@@ -330,5 +328,5 @@ repeat{
 # Beta_labels records the true classifications
 save(d, p, q, group_sizes, Beta, Beta_labels, Beta_cluster_num, true_means,
      Betas, Blabels, classifications, means, covariances, cluster_nums, best_models,
-     file = "/gpfs/gibbs/project/zhang_heping/yy634/JASA_case/simulations/setting2.RData")
+     file = "path/setting2.RData")
 

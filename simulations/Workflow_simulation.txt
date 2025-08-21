@@ -1,6 +1,6 @@
 Before elaborating the details of simulation, please download the datasets in this GitHub repository, https://github.com/YY634/multi-task-learning-with-group-wise-mixture-parameters/tree/main/demo_datasets
 To comply with NIH regulation on protecting sensitive/confidential data or UKB policy, some real  datasets used in simulation or real data analysis cannot be released. Therefore, we synthesized the above datasets (in GitHub repository) for illustration purpose. 
-Before running the R scripts, please store all the downloaded datasets and all the R scripts under the same directory. 
+Before running the R scripts, please store all the downloaded datasets and all the R scripts under the same directory. And then replace the "path" or "path_to" in all R scripts to be the directory of your choice.  
 
 
 

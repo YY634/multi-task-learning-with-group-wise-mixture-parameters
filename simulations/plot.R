@@ -2,7 +2,7 @@
 library(plotrix)
 
 # the evaluation results of setting1 is stored in data1; the evaluation results of setting2 is stored in data2; ...
-load("~/Documents/papers/groupwise mixture/JASA_casestudy/simulation/to_plot.RData")
+load("path/to_plot.RData")
 
 layout(matrix(c(1,2,1,2,3,4,3,4,5,6,5,6, 7,7), 7, 2, byrow = TRUE))
 par(mai=c(0.3, 0.5, 0.3, 0.3))

@@ -1,6 +1,3 @@
-#!/usr/bin/env Rscript
-#SBATCH --mem-per-cpu=2g  --time=1:00:00 --mail-type=ALL --mail-user=yisha.yao@yale.edu
-
 
 #the input of sort_grouping is a dataframe with two variables, "index" and "label".
 sort_grouping <- function(df){
@@ -49,7 +46,7 @@ ACC <- function(tr_sparsity, hat_sparsity){
 
 #setting 1.   
 n <- 1800;  d <- 3500;  q <- 700;  p <- 200;
-load("~/project/JASA_case/simulations/setting1.RData")
+load("path/setting1.RData")
 T <- length(classifications)
 RES <- matrix(0, T, 5)
 for (t in 1:T){
@@ -100,7 +97,7 @@ for (t in 1:T){
   RES[t,] <- eva
 }
 
-save(RES,  file = "/gpfs/gibbs/project/zhang_heping/yy634/JASA_case/simulations/eval_setting1.RData")
+save(RES,  file = "path/eval_setting1.RData")
 
 
 
