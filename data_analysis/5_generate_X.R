@@ -1,3 +1,7 @@
+
+#### This R script will perform group-wise PCA within each gene, and keep top PCs within each gene. 
+#### These PCs will stack vertically to form the design matrix X. It also standardize the columns of X.  
+
 library(plyr)
 library(Matrix)
 
@@ -10,7 +14,6 @@ load(paste0("/mnt/project/Data/X_Rdata/chr",chr,"_SNPs.RData"))
 # "chr21_SNPs.RData" contains genotype, an n*d matrix records the d SNP values of n individuals
 
 # match the individuals in Y (in "brain_volumes.rda") and X
-#load("/gpfs/gibbs/project/zhang_heping/wd278/Project_with_others/Yisha/Data/Phenotype/brain_volumes.rda")
 d<-read.csv("/mnt/project/Data/Final_phenotype_covariate.csv")
 X <- as.matrix(genotype); X[is.na(X)] <- 0; X <- X[rownames(X) %in% d[,1],]; rm(d)
 

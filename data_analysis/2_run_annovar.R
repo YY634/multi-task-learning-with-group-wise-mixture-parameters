@@ -1,3 +1,6 @@
+#### This R script uses "ANNOVAR" to conduct gene annotation. The objective is to group SNPs into genes and to remove intergenic SNPs.
+#### It produces the information about which SNP is contained in which gene
+
 system("dx download -r /annovar/")
 
 #1.Select one individual ID and transform the .bed .bim .fam format into .vcf format via PLINK.

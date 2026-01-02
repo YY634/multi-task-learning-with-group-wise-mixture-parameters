@@ -1,6 +1,8 @@
+#### This R script will parse the output of "ANNOVAR", group SNPs into genes, and remove intergenic SNPs.
+#### It generates a large table summarizing SNP ID, Chromosome number, gene name, the SNP values of the included individuals.
+
 # annotate_variation.pl -geneanno -buildver hg19 -dbtype refGene XXXX.avinput humandb/ -out XXXX 
 # produces three output files: .variant_function/  .exonic_variant_function/  .log
-
 for(chr in 1:22){
   # read in the .variant_function file that is output by ANNOVAR
   vf <- read.table(paste0("/mnt/project/Results/annovar_result/ukb_annovar_chr",chr,".variant_function"), sep = "\t", header = FALSE, stringsAsFactors = FALSE)

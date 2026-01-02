@@ -1,3 +1,8 @@
+
+#### This R script will preprocess the environmental/demographic covariates, and generate U.
+#### We include age, gender, handedness, race (top 10 PCs of the whole genome) as environmental/demographic covariates. 
+#### We standardize the continuous covariates (age, top 10 PCs of the whole genome), and leave the binary covariates as they are. 
+
 df<-read.csv("/mnt/project/Data/Final_phenotype_covariate.csv")
 cov<-df[,c(1,70:83)]
 colnames(cov)<-c("ID","age","sex","handedness","batch_group",paste0("PC",1:10))

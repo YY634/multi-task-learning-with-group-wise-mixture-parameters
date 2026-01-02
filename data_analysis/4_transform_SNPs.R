@@ -1,3 +1,8 @@
+#### This R script will transform binary SNP format into integers 0/1/2 and go through another round of SNP quality control.
+#### It generates a large matrix,  the i-th row of which records the SNP values of the i-th individual. 
+#### The grouping information of the SNPs (belonging to which gene) is contained in a separate file.
+
+
 datapath = "/mnt/project/Data/qc_geno/"
 
 library(snpStats)

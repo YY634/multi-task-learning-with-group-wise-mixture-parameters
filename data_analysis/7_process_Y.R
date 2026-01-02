@@ -1,3 +1,5 @@
+#### This R script will preprocess the brain regional volumes: outlier removal and normalization
+
 df<-read.csv("/mnt/project/Data/Final_phenotype_covariate.csv")
 pheno<-df[,c(1:69)]
 colnames(pheno)<-c("ID",
