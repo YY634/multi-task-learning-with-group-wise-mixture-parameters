@@ -1,3 +1,8 @@
+#### This R script will compare our identified brain networks to the standard Yeo7 Networks. 
+#### More specifically, the output is a table summarizing the overlap percentages between any identified brain network and the Yeo7 Networks. 
+#### It will show that our identified brain networks are enriched in two or three Yeo7 Networks insteading of just randomly picking up brain regions.
+
+
 library(readxl)
 library(dplyr)
 

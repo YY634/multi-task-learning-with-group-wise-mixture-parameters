@@ -1,5 +1,5 @@
-#### This R script will implement our method to fit model 2.1 on brain regional volumes (Y), genotype on chromosome 19 (X), and the environmental/demographic covariates (U).
-#### The output file "chr19_result.RData" includes the estimates and the clustering patterns of the estimated coefficient vectors.  
+#### This R script will implement our method to fit model 2.1 on brain regional volumes (Y), genotype on chromosome 18 (X), and the environmental/demographic covariates (U).
+#### The output file "chr18_result.RData" includes the estimates and the clustering patterns of the estimated coefficient vectors. 
 #### Three parameters "opt_lam", "lam_0", and "lam_thred" can be modified. 
 
 
@@ -10,34 +10,23 @@ library(plus)
 library(mclust)
 library(grplasso) 
 
-start.time<-Sys.time()
+#start.time<-Sys.time()
 
 options(warn = 1)
-load("/mnt/project/Data/X_Rdata/chr19_X.RData")
-Y<-read.csv("/mnt/project/Data/Final_phenotype_scaled.csv")
-U<-read.csv("/mnt/project/Data/Final_covariate_scaled.csv")
-rm(n_X, n_X_group_sizes) 
+load("./demo_datasets/chr18_X.RData")
+load("./demo_datasets/UKB_U.RData")
+load("./demo_datasets/UKB_Y.RData")
 
 # In UKB, different chrs may have slightly different row. Make sure X, Y, U have common rows.
-U<-U[match(rownames(n_s_PC_X),U$ID),]
-Y<-Y[match(rownames(n_s_PC_X),Y$ID),]
-sum(rownames(n_s_PC_X)!=U$ID)
-sum(rownames(n_s_PC_X)!=Y$ID)
-U<-U[,-1]
-U<-as.matrix(U)
-Y<-Y[,-1]
-Y<-as.matrix(Y)
-Y<-Y/100
-
-X <- n_s_PC_X; design <- cbind(X, U); group_sizes <- n_PC_group_sizes; grouping <- n_PC_grouping;  low <- n_pc_low;  upp <- n_pc_upp
-p <- dim(Y)[2]; n <- dim(X)[1]; d <- dim(X)[2]; q0 <- q; q <- n_q; m <- dim(U)[2] #m is the # of demographic factors 
+X <- s_PC_X; design <- cbind(X, U); group_sizes <- PC_group_sizes; grouping <- PC_grouping;  low <- pc_low;  upp <- pc_upp
+p <- dim(Y)[2]; n <- dim(X)[1]; d <- dim(X)[2]; m <- dim(U)[2] #m is the # of demographic factors 
 #q0 is the original number of groups before combining strongly correlated groups. q0=number of genes on chr1.
-rm(n_s_PC_X, n_pc_d, n_PC_group_sizes, n_PC_grouping, n_pc_low, n_pc_upp, n_q)
+rm(s_PC_X, pc_d, PC_group_sizes, PC_grouping, pc_low, pc_upp)
 grouping_all <- c(grouping, c((q+1):(q+m)))
 
-lam_0 <- opt_lam <- 2600;   lam_thred <- 2200
+lam_0 <- opt_lam <- 2400;  lam_thred <- 2000
 
-#### the records of iterations
+#the records of iterations
 Betas <- list()  #Betas[[t]] <- matrix(0, n_pc_d, p)
 Blabels <- list()  #Blabels[[t]] <- matrix(rep(1:p, n_q), ncol=p, byrow = T)
 means <- list()  #means[[t]] <- matrix(0, n_pc_d, p)
@@ -45,7 +34,7 @@ classifications <- list()  #classifications[[t]] <- matrix(0, n_q, p)
 cluster_nums <- list()  #cluster_nums[[t]] <- rep(0, n_q)
 covariances <- list()  #covariances[[t]] is also a list.
 
-#### to obtain the starting point (Step 1 of the algorithm)
+#to obtain the starting point
 Beta_0 <- matrix(0, d, p)
 Beta_0_labels <- matrix(rep(1:p, q), ncol=p, byrow = T)
 A_hat <- matrix(0, m, p) # A_hat is the starting point [alpha_1, ..., alpha_p]
@@ -93,7 +82,7 @@ siginv <- solve(SIG_hat)
 alpha_hat <- solve(t(U) %*% U) %*% t(U) %*% (Y- X%*% Beta_0) %*% rowSums(siginv)/sum(siginv)
 rm(i,j,k,l, fit, mcp, est, bj_list, bj_ind, bj_est, alpha_est, alpha_ind, indicator, mcpX, tp, Beta_0, Beta_0_labels, A_hat)
 
-#### conduct the clustering and assign the labels (Step 2 of the algorithm)
+
 Beta_temp <- Betas[[1]]
 Blabels_temp <- Blabels[[1]]  #Blabels_temp only gives information which groups are not zero but not classification labels
 means_temp <- matrix(0, d, p)
@@ -113,7 +102,7 @@ for (i in 1:q){
     cluster_nums_temp[i] <- 0
   } else{
     temp <- Beta_temp[(low[i]:upp[i]),Blabels_temp[i,]]
-    mod <- Mclust(t(temp), G=1:6, control=emControl(eps=0.001)) 
+    mod <- Mclust(t(temp), G=1:6, control=emControl(eps=0.001)) # maybe add the shape of the clusters?
     index1 <- which(Blabels_temp[i,] ==0)
     if (length(index1) >0){
       part1 <- as.data.frame(cbind(index1, 0))
@@ -142,10 +131,9 @@ for (i in 1:q){
 means[[1]] <- means_temp
 covariances[[1]] <- covs_temp
 classifications[[1]] <- classifications_temp
-cluster_nums[[1]] <- cluster_nums_temp 
+cluster_nums[[1]] <- cluster_nums_temp #best_models[[1]] <- best_models_temp
 rm(i, temp, mod, index1, part1, index2, part2, est, Beta_temp, Blabels_temp) 
 
-#### iterations below (Steps 3, 4, and 5)
 t <- 1
 repeat{
   #update Beta.  
@@ -242,7 +230,7 @@ repeat{
   }
   
   t <- t+1
-  Betas[[t]] <- Beta_temp;  Blabels[[t]] <- Blabels_temp  
+  Betas[[t]] <- Beta_temp;  Blabels[[t]] <- Blabels_temp  #best_lambda[[t]] <- mean(best_lams)
   rm(n_g_ind, nonzero_list, cov_list, covs, 
      class_ind, nonzero_ind, Xn, muj, covj, z_g_ind, zero_list, zero_ind, Xz, 
      leftmatrix, rightmatrix, res, fit1, fit2, mcp, grp_list, grp_ind, indicator, indicatornew, i, j,
@@ -255,7 +243,7 @@ repeat{
   
   #clustering on Beta_temp
   means_temp <- matrix(0, d, p)
-  covs_temp <- list() 
+  covs_temp <- list() #best_models_temp <- c()
   classifications_temp <- matrix(0, q, p)
   cluster_nums_temp <- rep(0, q)
   for (i in 1:q){
@@ -271,7 +259,7 @@ repeat{
       cluster_nums_temp[i] <- 0
     } else{
       temp <- Beta_temp[(low[i]:upp[i]),Blabels_temp[i,]]
-      mod <- Mclust(t(temp), G=1:6, control=emControl(eps=0.001)) 
+      mod <- Mclust(t(temp), G=1:6, control=emControl(eps=0.001)) # maybe add the shape of the clusters?
       index1 <- which(Blabels_temp[i,] ==0)
       if (length(index1) >0){
         part1 <- as.data.frame(cbind(index1, 0))
@@ -300,21 +288,21 @@ repeat{
   means[[t]] <- means_temp
   covariances[[t]] <- covs_temp
   classifications[[t]] <- classifications_temp
-  cluster_nums[[t]] <- cluster_nums_temp  
+  cluster_nums[[t]] <- cluster_nums_temp  #best_models[[t]] <- best_models_temp
   rm(i, temp, mod, index1, part1, index2, part2, est)
   
   if(sum((Beta_temp-Betas[[t-1]])^2)/(d*p) < 0.001 | t>4){break}
 } 
 
-print(Sys.time()-start.time)
-run_time<-Sys.time()-start.time
+#print(Sys.time()-start.time)
+#run_time<-Sys.time()-start.time
 
-save(n, d, p, q, q0, Betas, Blabels, classifications, means, covariances, cluster_nums, run_time,
-     file = "chr19_result.RData")
+save(n, d, p, q, Betas, Blabels, classifications, means, covariances, cluster_nums, 
+     file = "./chr18_result.RData")
 
-system(paste0("dx upload chr19_result.RData"))
+#system(paste0("dx upload chr18_result.RData"))
 
-system("dx upload ukb_chr19.R")
+#system("dx upload ukb_chr18.R")
 
-system("dx terminate job-J1v05B8JbfGJQkQVgj2kK68Q")
+#system("dx terminate job-J1v05YQJbfG0zxyvkqyYkJ30")
 

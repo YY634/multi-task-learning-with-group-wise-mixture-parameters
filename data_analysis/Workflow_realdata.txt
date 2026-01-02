@@ -1,8 +1,9 @@
 
+This study uses UK Biobank (https://www.ukbiobank.ac.uk/) Resource under Application Number 176775, with Field IDs: 31, 1707, 21022, 22009, 22418, 26789-26821, 26890-26922, 27519, 27741. The analysis is conducted on the UKB platform as the personal data is not allowed to be downloaded. 
 
-The genotypic data of Human Connectome Project Young Adult can be accessed from "dbGap" database (after application approval).
+The genotypic data and brain phenotypic data of Human Connectome Project Young Adult can be accessed from "dbGap" database (after application approval).
 
-The downloaded data (from dbGap) generally contains:
+The downloaded genetic data generally contains:
 MEGA_Chip.bed
 MEGA_Chip.bim
 MEGA_Chip.fam
@@ -11,13 +12,16 @@ MEGA_Chip.gds (not necessary, can be read by the software "SNPRelate")
 
 
 Before elaborating the details of real data analysis, please download the datasets in this GitHub repository, https://github.com/YY634/multi-task-learning-with-group-wise-mixture-parameters/tree/main/demo_datasets
-To comply with NIH regulation on protecting sensitive/confidential data or UKB policy, some real  datasets used in simulation or real data analysis cannot be released. Therefore, we synthesized the above datasets (in GitHub repository) for illustration purpose. 
-Before running the R scripts, please store all the downloaded datasets and all the R scripts under the same directory. And then replace the "path" or "path_to" in all R scripts to be the directory of your choice.  
+To comply with NIH regulation on protecting sensitive/confidential data or UKB policy, the real datasets used in simulation and real data analysis cannot be released. Therefore, we synthesized the above datasets (in GitHub repository) for illustration purpose. 
+Please set folder "reproducibility_materials" as the working directory. Under the working directory  ("reproducibility_materials"), there should be three sub-directories--"simulations",  "real_data_analysis", and "demo_datasets". 
+Before running the R scripts, please store all the downloaded datasets under "reproducibility_materials/demo_datasets/".
+Please replace the "path" or "path_to" (if there are any) in all R scripts to be the working directory.  
 
 
-Step 1: preprocess the dataset
-Run the R script "1_preprocess_dataset.R" to remove genetically dependent individuals and individuals with missing data.
-Last part of "1_preprocess_dataset.R" is use PLINK for SNP quality control, that is, filtering SNPs with low quality.
+preprocess the dataset: 
+Step 1: SNP quality control
+Run the R script "1_preprocess_SNP.R" to remove genetically dependent individuals and individuals with missing data.
+Last part of "1_preprocess_SNP.R" is use PLINK for SNP quality control, that is, filtering SNPs with low quality.
 
 Step 2: group SNPs into genes
 Run the R scripts "2_run_annovar.R" and "3_process_annovar_output.R" to group SNPs into genes and to remove intergenic SNPs. 
@@ -47,10 +51,5 @@ Step 9: validate the extracted brain subnetworks
 Run the R script "11_cluster_yeo7_overlap.R" to compute the overlap percentage between any identified subnetwork and Yeo7 network; run the R script "12_visualizebrain_gene_clusters_multiplot.R" to test the differential expression levels of this gene within and outside its induced subnetwork. 
 
 
-Due to the database policy, we are not allowed to release the real dataset which is sensitive and confidential. We synthesized some datasets for illustration purpose. We cannot generate the
-original SNP binary data. So, for illustration purpose, we start from Step 7 above.
-Under the folder “real_data_analysis”, there are three datasets, “chr18_X.RData”, “UKB_U.RData”,
-“UKB_Y.RData”. To implement our main algorithm, run the R script
-“9_ukb_chr18.R” which takes in the above three datasets. Then run the R scripts
-"10_extract_cluster.R" and "12_visualizebrain_gene_clusters_multiplot.R" to extract brain
-subnetworks and to visualize the subnetworks.
+Due to the database policy, we are not allowed to release the real dataset which is sensitive and confidential. We synthesized some datasets for illustration purpose, which will be input through the workflow above. The original SNP binary data cannot be synthesized. So, we start from Step 7 above.
+Under the folder “demo_datasets/”, there are three datasets, “chr18_X.RData”, “UKB_U.RData”, “UKB_Y.RData”. To implement our main algorithm, run the R script “demo_ukb_chr18.R” which takes in these three datasets. Then run the R scripts "demo_extract_cluster.R", "demo_cluster_yeo7_overlap.R", and "demo_visualizebrain_gene_clusters_multiplot.R" to extract brain subnetworks, compare to the Yeo7 Networks, and to visualize the subnetworks, respectively. The above procedure produces several RData files: "chr18_result.RData" contains all the estimates of fitting Model 2.1;  "chr18_clusters.RData" lists the extracted brain subnetworks; "chr18_overlap_to_yeo7.RData" shows the overlap percentages of each brain subnetwork with the standard Yeo7 Networks; "chr18_selected_clusters.RData" summarizes a list of informative subnetworks with high quality; a pdf file "NPC1_brain_network.pdf" will visualize one identified brain subnetwork. 

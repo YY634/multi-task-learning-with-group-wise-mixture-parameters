@@ -1,6 +1,7 @@
 #### This R script will visualize the identified brain subnetworks together with the differential gene expression levels within and outside the brain subnetwork
 #### The output is a PDF file showing the plot of the brain subnetwork and the gene expression levels.
 
+
 rm(list = ls())
 library(readxl)
 library(dplyr)
@@ -8,8 +9,8 @@ library(RColorBrewer)
 library(ggseg)
 library(ggpubr)
 
-dk_to_yeo7_key = read.csv(paste0(path, "Yeo_DK_key.csv"), row.names = 1)
-yeo7 = read.csv(paste0(path, "yeo7_NetworkNames.csv"))
+dk_to_yeo7_key = read.csv("./demo_datasets/Yeo_DK_key.csv", row.names = 1)
+yeo7 = read.csv("./demo_datasets/yeo7_NetworkNames.csv")
 colnames(yeo7) = c("yeo_krienen", "NetworkNames")
 dk_to_yeo7_key = merge(dk_to_yeo7_key, yeo7, by = "yeo_krienen")
 rm(yeo7)
@@ -18,7 +19,6 @@ colnames(dk_to_yeo7_key)[3] = "label"
 ######## Visualze yeo7 Networks
 yeo7_plot = dk_to_yeo7_key %>% 
   mutate(label_id = sapply(label , function(x) strsplit(as.character(x), "[_]")[[1]][2])) %>%
-  # group_by(label_id) %>%
   ggseg(mapping=aes(fill=NetworkNames),atlas = dk, 
         position="stacked", colour="black") +
   labs(title = "Yeo7(2011) Networks" ) +
@@ -30,36 +30,18 @@ yeo7_plot = dk_to_yeo7_key %>%
   scale_fill_manual(values = brewer.pal(7, "Set3"), na.value = "white")
 
 
-load(paste0(path,"PLOT.RData"))
-PLOT<-as.data.frame(PLOT)
+load("./demo_datasets/realdata_plot.RData")
+PLOT <- as.data.frame(realdata_plot)
 
 
-load(paste0(path,"/dkt_gene_expr_modified.RData"))
+load("./demo_datasets/dkt_gene_expr_modified.RData")
 colnames(dkt_gene)[5:72] = brain_names
 rm(dk)
-#yeo7_color = data.frame(color = brewer.pal(7, "Set3"), 
-#                        NetworkNames = levels(dk_to_yeo7_key$NetworkNames),
-#                        stringsAsFactors = F)
 
-yeo7_color = data.frame(color = brewer.pal(7, "Set3"), 
-                        NetworkNames = names(table(dk_to_yeo7_key$NetworkNames)),
-                        stringsAsFactors = F)
+yeo7_color = data.frame(color = brewer.pal(7, "Set3"), NetworkNames = names(table(dk_to_yeo7_key$NetworkNames)), stringsAsFactors = F)
 
-select_cluster<- PLOT[,]
-select_cluster <- select_cluster[c(1,8,15,22,29,36),]
+select_cluster<- PLOT[1,]
 
-# within_cluster_gene_expr = list()
-# for(i in 1:nrow(select_cluster)){
-#   g = sapply(strsplit(select_cluster[i, "gene"], "[,]")[[1]], function(x) gene_symbols[gene_symbols[, 1] %in% x, 2])
-#   rois = strsplit(as.character(select_cluster[i, "rois_cluster"]), "[,]")[[1]]
-#   clusterd_ind = rep(0, 68)
-#   clusterd_ind[sapply(rois, function(x) which(brain_names %in% x))] = 1
-#   tmp = dkt_gene[dkt_gene$gene_symbol %in% g, -c(1:4)]
-#   tmp = as.data.frame(t(tmp))
-#   colnames(tmp) = dkt_gene$gene_symbol[dkt_gene$gene_symbol %in% g]
-#   tmp$clustered = clusterd_ind
-#   within_cluster_gene_expr[[i]] = tmp
-# }
 
 within_cluster_gene_expr = list()
 for(i in 1:nrow(select_cluster)){
@@ -106,18 +88,11 @@ for(i in 1:length(within_cluster_gene_expr)){
   
   d_old <- d
   d <- d[,-1 ]
-  #scale_fill_manual(values = c("#D9D9D9", "#E41A1C"))
   stable.p <- ggtexttable(d, rows = c("Outside Cluster", "Within Cluster", "p-value"))
   p_clusters[[length(p_clusters) + 1]] = stable.p
-  multi.page <- ggarrange(plotlist = p_clusters, nrow = 1) # for one plot per page
-  ggsave(filename=paste0("/Volumes/Students/yh567/Manuscripts/Project_for_YY/plot/select_row_", i, "_Gene_boxplot_v2.pdf"), multi.page,width=8,height=3)
+  multi.page <- ggarrange(plotlist = p_clusters, nrow = 1)
+  #ggsave(filename="./Gene_boxplot.pdf", multi.page, width=8,height=3)
   
-  # multi.page <- ggarrange(stable.p)
-  # ggexport(multi.page,
-  #          width = 16, height = 10,
-  #          filename=paste0("Y:/wd278/Projects with Others/YY/Results/Visualization/select_cluster/select_row_", i, "_Gene_boxplot_v2.pdf"))
-
-   
   tmp = results %>% 
     left_join(dk_to_yeo7_key, by = "label") %>%
     filter(clustered == 1) %>%
@@ -134,13 +109,8 @@ for(i in 1:length(within_cluster_gene_expr)){
   scale_fill_manual(values = sapply(sort(unique(tmp$NetworkNames)), function(x) yeo7_color$color[yeo7_color$NetworkNames %in% x]),
                     na.value = "white")
   
-  multi.page2 <- ggarrange(yeo7_plot, 
-                           cluster_plot + rremove("legend"), ncol=2, nrow = 1,
-                           common.legend = TRUE, legend = "bottom") # for one plot per page
-  #ggexport(multi.page2, 
-  #         filename=paste0("/Volumes/Students/yh567/Manuscripts/Project_for_YY/plot/select_row_", i, "_cluster_boxplot.pdf"))
-  ggsave(filename=paste0("/Volumes/Students/yh567/Manuscripts/Project_for_YY/plot/select_row_", i, "_cluster_boxplot.pdf"), 
-         multi.page2,width = 10, height=5)
+  multi.page2 <- ggarrange(yeo7_plot, cluster_plot + rremove("legend"), ncol=2, nrow = 1, common.legend = TRUE, legend = "bottom") 
+  #ggsave(filename="./NPC1_brain_network.pdf",  multi.page2,width = 10, height=5)
   
   blank_plot <- ggplot() + theme_void()
   
@@ -153,7 +123,6 @@ for(i in 1:length(within_cluster_gene_expr)){
                            heights = c(5,0.35,3.5),
                            widths = c(0.5,10))
   
-  ggsave(filename=paste0("/Volumes/Students/yh567/Manuscripts/Project_for_YY/plot/select_row_", i, "_cluster_gene_boxplot.pdf"), 
-         multi.page3,width = 10, height=8)
+  ggsave(filename="./NPC1_brain_network.pdf",  multi.page3,width = 10, height=8)
 }
 

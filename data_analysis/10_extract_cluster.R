@@ -1,3 +1,7 @@
+#### This R script will extract identified brain subnetworks from the results of fitting Model 2.1.
+#### It also formulates the identified brain networks in a readable format for subsequent steps. 
+#### The output includes the gene name (network-inducing gene), which chromosome the gene lies within, the number of brain regions belonging to the network, the brain regions within this network
+
 library(readxl)
 
 ###### code below is for the chromosome (chr18 in UKB) which does not go through group-combinations

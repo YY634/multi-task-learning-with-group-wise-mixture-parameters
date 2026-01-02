@@ -1,10 +1,14 @@
+#### This R script will implement our method to fit model 2.1 on brain regional volumes (Y), genotype on chromosome 22 (X), and the environmental/demographic covariates (U).
+#### The output file "chr22_result.RData" includes the estimates and the clustering patterns of the estimated coefficient vectors. 
+#### Three parameters "opt_lam", "lam_0", and "lam_thred" can be modified. 
+
 
 library(plyr)
 library(MASS)
 library(Matrix)
 library(plus)
 library(mclust)
-library(grplasso) #library(doParallel)
+library(grplasso) 
 
 start.time<-Sys.time()
 
@@ -33,16 +37,16 @@ grouping_all <- c(grouping, c((q+1):(q+m)))
 
 lam_0 <- opt_lam <- 8200;  lam_thred <- 7000
 
-#the records of iterations
+#### the records of iterations
 Betas <- list()  #Betas[[t]] <- matrix(0, n_pc_d, p)
 Blabels <- list()  #Blabels[[t]] <- matrix(rep(1:p, n_q), ncol=p, byrow = T)
 means <- list()  #means[[t]] <- matrix(0, n_pc_d, p)
 classifications <- list()  #classifications[[t]] <- matrix(0, n_q, p)
 cluster_nums <- list()  #cluster_nums[[t]] <- rep(0, n_q)
 covariances <- list()  #covariances[[t]] is also a list.
-#best_models <- list()  #best_models[[t]] <- c()
 
-#to obtain the starting point
+
+#### to obtain the starting point (Step 1 of the algorithm)
 Beta_0 <- matrix(0, d, p)
 Beta_0_labels <- matrix(rep(1:p, q), ncol=p, byrow = T)
 A_hat <- matrix(0, m, p) # A_hat is the starting point [alpha_1, ..., alpha_p]
@@ -90,7 +94,7 @@ siginv <- solve(SIG_hat)
 alpha_hat <- solve(t(U) %*% U) %*% t(U) %*% (Y- X%*% Beta_0) %*% rowSums(siginv)/sum(siginv)
 rm(i,j,k,l, fit, mcp, est, bj_list, bj_ind, bj_est, alpha_est, alpha_ind, indicator, mcpX, tp, Beta_0, Beta_0_labels, A_hat)
 
-
+#### conduct the clustering and assign the labels (Step 2 of the algorithm)
 Beta_temp <- Betas[[1]]
 Blabels_temp <- Blabels[[1]]  #Blabels_temp only gives information which groups are not zero but not classification labels
 means_temp <- matrix(0, d, p)
@@ -142,6 +146,8 @@ classifications[[1]] <- classifications_temp
 cluster_nums[[1]] <- cluster_nums_temp #best_models[[1]] <- best_models_temp
 rm(i, temp, mod, index1, part1, index2, part2, est, Beta_temp, Blabels_temp) 
 
+
+#### iterations below (Steps 3, 4, and 5)
 t <- 1
 repeat{
   #update Beta.  
@@ -238,7 +244,7 @@ repeat{
   }
   
   t <- t+1
-  Betas[[t]] <- Beta_temp;  Blabels[[t]] <- Blabels_temp  #best_lambda[[t]] <- mean(best_lams)
+  Betas[[t]] <- Beta_temp;  Blabels[[t]] <- Blabels_temp  
   rm(n_g_ind, nonzero_list, cov_list, covs, 
      class_ind, nonzero_ind, Xn, muj, covj, z_g_ind, zero_list, zero_ind, Xz, 
      leftmatrix, rightmatrix, res, fit1, fit2, mcp, grp_list, grp_ind, indicator, indicatornew, i, j,
@@ -267,7 +273,7 @@ repeat{
       cluster_nums_temp[i] <- 0
     } else{
       temp <- Beta_temp[(low[i]:upp[i]),Blabels_temp[i,]]
-      mod <- Mclust(t(temp), G=1:6, control=emControl(eps=0.001)) # maybe add the shape of the clusters?
+      mod <- Mclust(t(temp), G=1:6, control=emControl(eps=0.001)) 
       index1 <- which(Blabels_temp[i,] ==0)
       if (length(index1) >0){
         part1 <- as.data.frame(cbind(index1, 0))
@@ -314,7 +320,3 @@ system("dx upload ukb_chr22.R")
 
 system("dx terminate job-J1qvkv8JbfGFkF1fJXv5Z9ZZ")
 
-#class <- classifications[[10]]; label <- Blabels[[10]]
-#check <- rep(0, q)
-#for (i in 1:q){ check[i] <- length(which(class[i,] !=0)) }
-#length(which(check !=0)) 
