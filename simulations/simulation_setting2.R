@@ -1,3 +1,8 @@
+###### This R scripts performs simulation study under setting 2. It will generate two files "setting2.RData" and "eval_setting2.RData"
+###### The file "setting2.RData" contains the estimates of fitting Model 2.1 using our algorithm.  
+###### The file "eval_setting2.RData" summarizes the five quality measurements in Figure 1.
+###### Three parameters "opt_lam", "lam_0", and "lam_thred" can be modified. 
+
 
 #setting 2
 n <- 1800;  d <- 6000;  q <- 800;  p <- 200;  del <- 0.12; m <- 4
@@ -9,6 +14,7 @@ library(plus)
 library(mclust)
 library(grplasso)
 
+### a function that randomly divide an M-dimensional vector into N groups
 rand_vect <- function(N, M, sd = 1, pos.only = TRUE) {
   vec <- rnorm(N, M/N, sd)
   if (abs(sum(vec)) < 0.01) vec <- vec + 1
@@ -26,12 +32,13 @@ rand_vect <- function(N, M, sd = 1, pos.only = TRUE) {
   vec
 }
 
+#### simulate the data X, E, U
 set.seed(28)
 SIG <- cov(mvrnorm(4*p, rep(0, p), diag(p)))
 E <- mvrnorm(n, mu=rep(0, p), Sigma=SIG)
 X <- mvrnorm(n, mu=rep(0, d), Sigma=diag(d))
 U <- cbind( rbinom(n, size = 1, prob = 0.5), sample(c(16:40), n, replace = TRUE), runif(n, -2, 1), runif(n, 0, 2) )
-
+#### simulate the coefficient matrix B
 group_sizes <- rand_vect(q, d)
 ind_low <- rep(0, q);  ind_upp <- rep(0, q);  count <- 0
 for (i in 1:q){
@@ -78,17 +85,18 @@ alpha <- c(3, 0.2, 1.5, 0)
 Y <- X %*% Beta + U %*% (alpha %*% t(rep(1, p))) + E
 design <- cbind(X, U)
 
-Betas <- list()  #Betas[[t]] <- matrix(0, n_pc_d, p)
-Blabels <- list()  #Blabels[[t]] <- matrix(rep(1:p, n_q), ncol=p, byrow = T)
-means <- list()  #means[[t]] <- matrix(0, n_pc_d, p)
-classifications <- list()  #classifications[[t]] <- matrix(0, n_q, p)
-cluster_nums <- list()  #cluster_nums[[t]] <- rep(0, n_q)
-best_models <- list()  #best_models[[t]] <- c()
-covariances <- list()  #covariances[[t]] is also a list.
-
+#### the iterates will be stored in these lists
+Betas <- list()  
+Blabels <- list()  
+means <- list()  
+classifications <- list()  
+cluster_nums <- list()  
+best_models <- list()  
+covariances <- list()  
+#### compute the starting points
 Beta_0 <- matrix(0, d, p)
 Beta_0_labels <- matrix(rep(1:p, q), ncol=p, byrow = T)
-A_hat <- matrix(0, m, p) # A_hat is the starting point [alpha_1, ..., alpha_p]
+A_hat <- matrix(0, m, p) 
 for (j in 1:p){
   fit <- grplasso(design, y=Y[,j], index=grouping_all, lambda=lam_0, model=LinReg(), penscale=sqrt, control=grpl.control(update.hess="lambda", trace=0), center=FALSE)
   est <- fit$coefficients[,1]; bj_est <- est[1:d]; alpha_est <- est[(d+1):(d+m)]
@@ -117,12 +125,11 @@ for (j in 1:p){
   }
 }
 Betas[[1]] <- Beta_0
-Blabels[[1]] <- Beta_0_labels #Blabels only gives information which groups are not zero
+Blabels[[1]] <- Beta_0_labels 
 SIG_hat <-  t(Y- X %*% Beta_0 - U %*% A_hat) %*% (Y- X %*% Beta_0 - U %*% A_hat)/n
 siginv <- solve(SIG_hat)
 alpha_hat <- solve(t(U) %*% U) %*% t(U) %*% (Y- X%*% Beta_0) %*% rowSums(siginv)/sum(siginv)
 rm(i,j,k,l, fit, mcp, est, bj_list, bj_ind, bj_est, alpha_est, alpha_ind, indicator, Beta_0, Beta_0_labels, A_hat)
-
 
 Beta_temp <- Betas[[1]]
 Blabels_temp <- Blabels[[1]]  #Blabels_temp only gives information which groups are not zero
@@ -140,7 +147,7 @@ for (i in 1:q){
     cluster_nums_temp[i] <- 0
   } else{
     temp <- Beta_temp[(ind_low[i]:ind_upp[i]),Blabels_temp[i,]]
-    mod <- Mclust(t(temp), G=1:10, control=emControl(eps=0.001)) # maybe add the shape of the clusters?
+    mod <- Mclust(t(temp), G=1:10, control=emControl(eps=0.001)) 
     index1 <- which(Blabels_temp[i,] ==0)
     part1 <- as.data.frame(cbind(index1, 0))
     colnames(part1) <- c("index", "label")
@@ -170,10 +177,10 @@ classifications[[1]] <- classifications_temp
 cluster_nums[[1]] <- cluster_nums_temp
 best_models[[1]] <- best_models_temp
 rm(i, temp, mod, index1, part1, index2, part2, est, Beta_temp, Blabels_temp) 
-#means_temp, classifications_temp, cluster_nums_temp, best_models_temp, covs_temp
 
 
 
+#### running iterations
 t <- 1
 repeat{
   #update Beta.  
@@ -185,7 +192,6 @@ repeat{
     n_g_ind <- which(classifications_temp[,j]!=0)
     z_g_ind <- which(classifications_temp[,j]==0) 
     tildeyj <- Y[,j] - U %*% alpha_hat
-    #if (length(n_g_ind) >0){}else{ Xz <- X; zero_ind <- c(1:d) }
     
     nonzero_list <- list()
     cov_list <- list()
@@ -290,7 +296,7 @@ repeat{
     } else{
       temp <- Beta_temp[(ind_low[i]:ind_upp[i]),Blabels_temp[i,]]
       mod <- Mclust(t(temp), G=1:10, control=emControl(eps=0.001))
-      #if do not specify control=emControl(eps=0.001), the resulting cov might be singular, and then resort to ginv(con), not accurate in updating Beta
+      
       index1 <- which(Blabels_temp[i,] ==0)
       part1 <- as.data.frame(cbind(index1, 0))
       colnames(part1) <- c("index", "label")
@@ -325,8 +331,110 @@ repeat{
 }
 
 
-# Beta_labels records the true classifications
 save(d, p, q, group_sizes, Beta, Beta_labels, Beta_cluster_num, true_means,
      Betas, Blabels, classifications, means, covariances, cluster_nums, best_models,
-     file = "path/setting2.RData")
+     file = "./setting2.RData")
+
+
+#### these functions are needed to evaluate the accuracy of the results
+sort_grouping <- function(df){
+  attach(df)
+  temp <- df[order(label, index),]
+  labels <- sort(unique(temp$label))
+  num <- length(labels)
+  L <- list()
+  for (i in 1:num){
+    ind <- which(temp$label == labels[i])
+    L[[i]] <- temp$index[ind]
+  }
+  L <- L[order(sapply(L, function(x) x[1], simplify=TRUE))]
+  group_sizes <- rep(0, num)
+  for(l in 1:num){
+    group_sizes[l] <- length(L[[l]])
+  }
+  ordered_index <- unlist(L)
+  new_labels <- rep(1:num, group_sizes)
+  new_df <- as.data.frame(cbind(ordered_index, new_labels))
+  colnames(new_df) <- c("index", "label")
+  return(new_df)
+}
+
+
+TPR <- function(tr_sparsity, hat_sparsity){
+  real_pos <- length(which(tr_sparsity != 0))
+  detected_pos <- length(which(tr_sparsity !=0 & hat_sparsity != 0))
+  rate <- detected_pos/real_pos
+  return(rate)
+}
+TNR <- function(tr_sparsity, hat_sparsity){
+  real_neg <- length(which(tr_sparsity == 0))
+  detected_neg <- length(which(tr_sparsity ==0 & hat_sparsity == 0))
+  rate <- detected_neg/real_neg
+  return(rate)
+}
+ACC <- function(tr_sparsity, hat_sparsity){
+  detected_pos <- length(which(tr_sparsity !=0 & hat_sparsity != 0))
+  detected_neg <- length(which(tr_sparsity ==0 & hat_sparsity == 0))
+  total <- dim(as.matrix(tr_sparsity))[1] * dim(as.matrix(tr_sparsity))[2]
+  rate <- (detected_pos+detected_neg)/total
+  return(rate)
+}
+
+
+#### evaluate the accuracy of the obtained estimates
+n <- 1800;  d <- 6000;  q <- 800;  p <- 200
+load("./setting2.RData")
+T <- length(classifications)
+RES <- matrix(0, T, 5)
+for (t in 1:T){
+  # to order the labels in classifications[[t]]
+  labels_temp <- matrix(0, q, p)
+  class_temp <- classifications[[t]]
+  for (i in 1:q){
+    index2 <- which(class_temp[i,] !=0)
+    if (length(index2)==0){}else{
+      index1 <- which(class_temp[i,] ==0)
+      part1 <- as.data.frame(cbind(index1, 0))
+      colnames(part1) <- c("index", "label")
+      part2_temp <- as.data.frame(cbind(index2, class_temp[i,index2]))
+      colnames(part2_temp) <- c("index", "label")
+      part2 <- sort_grouping(part2_temp)
+      colnames(part2) <- c("index", "label")
+      est <- rbind(part1, part2)
+      est <- est[order(est$index),]
+      labels_temp[i,] <- as.vector(est$label)
+    }
+  }
+  rm(i, index1, index2, part1, part2, part2_temp, est)
+  # to order the labels in Beta_labels (truth)
+  true_labels <- matrix(0, q, p)
+  for (i in 1:q){
+    index4 <- which(Beta_labels[i,] !=0)
+    if (length(index4)==0){}else{
+      index3 <- which(Beta_labels[i,] ==0)
+      part3 <- as.data.frame(cbind(index3, 0))
+      colnames(part3) <- c("index", "label")
+      part4_temp <- as.data.frame(cbind(index4, Beta_labels[i, index4]))
+      colnames(part4_temp) <- c("index", "label")
+      part4 <- sort_grouping(part4_temp)
+      colnames(part4) <- c("index", "label")
+      tr <- rbind(part3, part4)
+      tr <- tr[order(tr$index),]
+      true_labels[i,] <- as.vector(tr$label)
+    }
+  }
+  rm(i, index3, index4, part3, part4, part4_temp, tr)
+  
+  eva <- rep(0, 5)
+  eva[1] <- sum((Beta-Betas[[t]])^2)/(d*p)
+  eva[2] <- ACC(Beta_labels, Blabels[[t]])
+  eva[3] <- length(which(true_labels !=  labels_temp))/(q*p) 
+  eva[4] <- length(which(Beta_cluster_num != cluster_nums[[t]]))/q
+  eva[5] <- sum((true_means - means[[t]])^2)/(d*p)
+  RES[t,] <- eva
+}
+
+save(RES,  file = "./eval_setting2.RData")
+
+
 
