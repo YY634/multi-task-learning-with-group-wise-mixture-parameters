@@ -1,0 +1,93 @@
+
+_________________________________________________________________________________________________
+mkdir heritability
+cd ~/heritability/
+###### install the LDSC package via following the instructions on https://github.com/bulik/ldsc
+Copied here:
+git clone https://github.com/bulik/ldsc.git
+cd ldsc
+conda env create --file environment.yml
+
+
+###### go to https://utexas.app.box.com/s/vkd36n197m8klbaio3yzoxsee6sxo11v
+Download the whole folder "eur_w_ld_chr" 
+mv -r ~/Downloads/eur_w_ld_chr ~/heritability/
+_______________________________________________________________________________________________
+
+
+###### download the summary statistics using the command
+cd ~/heritability/
+
+curl -O -L -C - https://open.win.ox.ac.uk/ukbiobank/big40/release2/stats33k/0616.txt.gz
+
+gunzip 0616.txt.gz
+mv 0616.txt 0616_raw.txt
+
+
+###### Transform the last column of the downloaded file "0616.txt". P-value = 10^{-lastcolumn} via the code
+awk 'NR==1 {print; next} { printf "%s", $1;
+       for (i=2; i<NF; i++) printf " %s", $i;
+       printf " %.5e\n", 10^(-$NF) }' 0616_raw.txt > 0616.txt
+
+Then manually change the column name of the last column in "0616.txt" into "pval". 
+
+
+
+###### Create a directory for each UKB_ID item and put the transformed txt file into the directory
+mkdir UKB0616
+mv 0616.txt UKB0616/
+rm 0616_raw.txt
+
+
+###### Split the file into 22 files
+cd UKB0616
+awk '
+NR==1 { header=$0; next }
+{
+  file = "0616_" $1 ".txt"
+  if (!(file in seen)) {
+    print header > file
+    seen[file] = 1
+  }
+  print >> file
+}
+' 0616.txt
+
+
+rm 0616_0X.txt
+
+
+###### download the file "munge_0616_split.sh" and put it under the directory ~/heritability/
+###### run the 22 files one by one in a successive manner
+cd ~/heritability/
+conda activate ldsc
+
+
+Each task produces two output files: "0616_##_ldsc.log", "0616_##_ldsc.sumstats.gz". Where ##=01, 02, 03, ..., 21, 22
+This step is most time and CPU consuming. 
+The file "0616_##_ldsc.sumstats.gz" (important) will be used in the next step.
+
+###### replace the "##" in the command below by 01, 02, 03, ..., 21, 22
+
+######
+cd ~/heritability/UKB0616/
+
+for i in $(seq -w 1 22); do
+  ../ldsc/munge_sumstats.py \
+    --sumstats 0616_${i}.txt \
+    --N 31968 \
+    --out 0616_${i}_ldsc \
+    --merge-alleles ../eur_w_ld_chr/w_hm3.snplist
+done
+
+
+for i in $(seq -w 1 22); do
+  ../ldsc/ldsc.py \
+    --h2 0616_${i}_ldsc.sumstats.gz \
+    --ref-ld-chr ./eur_w_ld_chr/ \
+    --w-ld-chr ./eur_w_ld_chr/ \
+    --out 0616_${i}_h2
+done
+
+
+
