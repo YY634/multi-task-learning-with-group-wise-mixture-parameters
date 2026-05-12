@@ -30,7 +30,7 @@ Step 3: transform the binary SNP data into 0/1/2
 Run the R script "4_transform_SNPs.R" to transform binary SNP format into integers 0/1/2.  
 
 Step 4: conduct group-wise PCA within each gene
-Run the R script "5_generate_X.R" to perform group-wise PCA within each gene, and keep top PCs within each gene. These PCs will stack vertically to form the design matrix X. Standardize the columns of X. The result may vary slightly depending on the how many PCs you choose to keep.
+Run the R script "5_generate_X.R" to perform group-wise PCA within each gene, and keep top PCs within each gene. These PCs will stack vertically to form the design matrix X. Standardize the columns of X. The result may vary slightly due to the random algorithm used and also depending on the how many PCs you choose to keep.
 
 The above steps will produce chr##_X.RData which contains the design matrix for chromosome## and its dimensions. 
 
@@ -42,7 +42,7 @@ Step 6: preprocess the brain regional volumes
 Run the R script "7_process_Y.R" to preprocess the brain regional volumes to generate the response Y.  
 
 Step 7: apply the main algorithm, Algorithm 1, to X, U, Y
-Run the R script "9_ukb_chr##.R" to implement our method to fit model 2.1 on brain regional volumes (Y), genotype on chromosome ## (X), and the environmental/demographic covariates (U). The output includes the clustering patterns of the estimated coefficient vectors.  Note that results may vary slightly depending on your choice of tuning parameters.
+Run the R script "9_ukb_chr##.R" to implement our method to fit model 2.1 on brain regional volumes (Y), genotype on chromosome ## (X), and the environmental/demographic covariates (U). The output includes the clustering patterns of the estimated coefficient vectors.  Note that results may vary slightly due to the randomness of the step "on-and-off support swap" and also depending on your choice of tuning parameters.
 
 Step 8: extract clusters/subnetworks from the output
 Run the R script "10_extract_cluster.R" to extract the subnetworks induced by genes. 
